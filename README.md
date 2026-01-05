@@ -33,15 +33,11 @@ Desain mencakup:
 ---
 
 # Fitur dan Spesifikasi  
-[jelaskan fitur yang dimiliki oleh tugas besar yang akan dibuat]
 
 ## **Fitur**
-- Mendeteksi pola biner **101**  
-- Respons deteksi lebih cepat karena Mealy Machine  
-- Mendukung *overlapping detection*, contoh:  
-  - Input `10101` menghasilkan dua kali deteksi  
+- Memproses oprasi aritmatika
 - Input dari switch FPGA  
-- Output berupa LED indikator  
+- Output berupa 7 Segment  
 
 ## **Spesifikasi**
 - Input bit dari **SW & KEY**  
