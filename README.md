@@ -24,10 +24,9 @@ Desain mencakup:
 ---
 
 # Fungsi 
-- Meningkatkan pemahaman mengenai implementasi logika digital berbasis FPGA.
-- Menambah pengalaman dalam perancangan dan pemrograman perangkat keras menggunakan bahasa Hardware Description Language (HDL).
-- Memberikan pemahaman mengenai sistem representasi bilangan fixed-point dan penerapannya dalam aritmetika digital.
-- Mengembangkan keterampilan melakukan simulasi dan verifikasi sistem digital hingga implementasi pada perangkat keras nyata.
+- Mengolah hasil perhitungan secara kombinasi sesuai operasi yang dipilih
+- Menampilkan nilai operand dan hasil pada 7-segment dalam format BCD
+- Menunjukkan implementasi pada FPGA
 
 
 ---
@@ -50,61 +49,52 @@ Desain mencakup:
 ---
 
 # Cara Penggunaan  
-[Bisa dalam bentuk flowchart agar lebih mudah dimengerti, bisa dalam bentuk poin – poin penjelasan]
 
 ### **Langkah-langkah**
 1. Kompilasi desain di Quartus dan download file `.sof` ke FPGA.  
-2. Berikan input bit menggunakan **SW0**.  
-3. Tekan **KEY0** untuk memberikan clock (jika digunakan mode step clock).  
-4. Output HIGH akan muncul pada **LED0** jika pola **101** muncul dalam urutan input.  
+2. Berikan input bit menggunakan **SW0-7**.  
+3. Tekan **KEY 0-3** untuk melakukan operasi aritmatika 
+4. Output angka akan muncul pada **7 Segment 0-1** jika output minus (-) maka akan menampilkan **Er**.  
 
 ### **Flowchart**
+<img width="544" height="779" alt="image" src="Flowchart.jpeg" />
 
 # Blok Diagram  
-[Menggambarkan blok-blok yang digunakan, diberi paragraf penjelasan kegunaan dan input output setiap blok]
-// ini contoh 
-<img width="629" height="250" alt="image" src="https://github.com/user-attachments/assets/7992a6ba-355d-429f-aa73-e2f0b3810c51" />
+<img width="546" height="708" alt="image" src="Block Diagram.jpeg" />
 
-
-# FSM 
-[Menjelaskan cara kerja dan transisi dalam FSM]
-
-### Penjelasan Blok  
-- **Input Handler**: Mengambil bit dari switch dan mengirimkan ke FSM.  
-- **Mealy FSM Detector**: Memproses input & state, menghasilkan output langsung jika pola ditemukan.  
-- **Output Driver**: Mengatur LED indikator deteksi pola.
-
----
 
 # FSM (Mealy Machine)
 
-FSM dirancang untuk mendeteksi pola **101**.
+FSM dirancang untuk memilih operasi aritmatika pada sistem kalkulator FPGA.
 
-### **State (3 state Mealy)**
-- **S0** – Belum menerima bagian pola  
-- **S1** – Menerima ‘1’  
-- **S2** – Menerima ‘10’  
+State (4 state Mealy)
+- STATE_ADD – Mode penjumlahan aktif
+- STATE_SUB – Mode pengurangan aktif
+- STATE_MUL – Mode perkalian aktif
+- STATE_DIV – Mode pembagian aktif 
 
-<img width="303" height="181" alt="image" src="https://github.com/user-attachments/assets/104a3f8d-a7dc-47b0-80a0-106e2b8adeb8" />
+<img width="795" height="621" alt="image" src="FSM.jpeg" />
 
-### **Tabel Transisi FSM Mealy (Pola 101)**
+Perilaku Transisi dan Output
+- FSM berpindah state berdasarkan tombol operasi yang ditekan.
+- Setiap state dapat berpindah langsung ke state lain, tidak harus berurutan.
+- Output operasi aktif berubah segera saat tombol ditekan, sesuai karakteristik Mealy machine.
 
-<img width="762" height="200" alt="image" src="https://github.com/user-attachments/assets/a1bb5e9f-f80b-4ba2-b9f5-dbbbe2acc1b9" />
-
-
-**Output terjadi saat transisi dari S2 dengan input = 1.**
+Output operasi dihasilkan saat transisi state yang dipicu oleh input tombol
+(misal: dari STATE_ADD ke STATE_SUB ketika press_sub = 1).
 
 ---
 # Hasil simulasi dan Analisis
 
-<img width="987" height="309" alt="image" src="https://github.com/user-attachments/assets/efde1792-d3a6-45a0-9703-f3ae64677cb1" />
+<img width="1695" height="214" alt="image" src="Screenshot Testbench.png" />
 
-Waveform menunjukkan bahwa clock dan input bekerja normal dengan reset = 0 sehingga FSM aktif. Saat input din membentuk urutan 1 → 0 → 1, FSM bergerak melalui state S0 → S1 → S2 → S1. Pada saat FSM berada di S2 dan menerima input 1, output dout menjadi HIGH selama satu siklus clock. Hal ini menandakan bahwa pola 101 berhasil terdeteksi tepat pada transisi yang sesuai dengan karakter Mealy Machine (output muncul berdasarkan state + input). Setelah deteksi, FSM kembali ke state S1 sehingga overlapping dapat dideteksi pada urutan berikutnya. Secara keseluruhan, waveform menunjukkan bahwa sequence detector Mealy 101 berjalan sesuai desain dan berfungsi dengan benar.
+Waveform menunjukkan bahwa perubahan input SW dan KEY langsung mempengaruhi keluaran 7-segment tanpa anomali sinyal. Nilai SW[3:0] dan SW[7:4] merepresentasikan operand, sedangkan KEY menentukan operasi yang diuji, yang terlihat dari perubahan pola biner pada HEX0–HEX5.
+
+Pada operasi aritmatika normal, keluaran 7-segment menampilkan hasil yang benar dalam format BCD dan berubah segera setelah input diubah. Ketika terjadi hasil negatif atau pembagian dengan nol, HEX1 dan HEX0 menampilkan “Er”, menandakan bahwa logika pendeteksi error bekerja dengan benar. Setelah kondisi error berakhir, tampilan kembali normal. Secara keseluruhan, hasil simulasi menunjukkan bahwa modul kalkulator berfungsi stabil dan sesuai dengan rancangan.
 
 # Lampiran (Kode Verilog)
-Kode Verilog ada di sini: [mealy_101.v](src/mealy_101.v) 
-File test: [mealy_101_tb.v](src/mealy_101_tb.v) 
+Kode Verilog ada di sini: [Tubes.v](Tubes.v) & [seven_seg](seven_seg.v)
+File test: [tb_Tubes.v](tb_Tubes.v) 
 
 # Link Video Implementasi
-
-[masukan link video progress atau hasil yang telah berhasil diimplementasikan kehardware]
+https://github.com/Verlice-30/PERANCANGAN-DAN-IMPLEMENTASI-KALKULATOR-ARITMETIKA-FIXED-POINT-4-BIT-BERBASIS-FPGA/blob/c6bbea6e09c6db69a9422ed20766de3b3858cfd3/Video%20Implementasi%20FPGA.mp4
